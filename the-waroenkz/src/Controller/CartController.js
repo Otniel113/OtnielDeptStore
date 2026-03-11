@@ -1,9 +1,18 @@
-import { useState } from 'react';
-import { checkoutAPI } from '../api-routes/api';
+import { useState, useCallback } from 'react';
+import { transactionAPI } from '../api-routes/api';
 
 export function useCartController(products, fetchLatestData) {
   const [cart, setCart] = useState([]);
   const [transactionHistory, setTransactionHistory] = useState([]);
+
+  const fetchHistory = useCallback(async () => {
+    try {
+      const data = await transactionAPI.getHistory();
+      setTransactionHistory(data || []);
+    } catch (e) {
+      console.error(e);
+    }
+  }, []);
 
   function getAvailableStock(productId) {
     const product = products.find(p => p.id === productId);
@@ -38,8 +47,8 @@ export function useCartController(products, fetchLatestData) {
   async function checkout() {
     if (cart.length === 0) return null;
     const items = cart.map(i => ({ product_id: i.id, quantity: i.qty }));
-    const result = await checkoutAPI.checkout(items);
-    setTransactionHistory(prev => [result, ...prev]);
+    const result = await transactionAPI.checkout(items);
+    await fetchHistory();
     setCart([]);
     if (fetchLatestData) {
       await fetchLatestData();
@@ -49,5 +58,5 @@ export function useCartController(products, fetchLatestData) {
 
   const cartTotal = cart.reduce((sum, item) => sum + item.price * item.qty, 0);
 
-  return { cart, setCart, transactionHistory, getAvailableStock, addToCart, updateQty, clearCart, checkout, cartTotal };
+  return { cart, setCart, transactionHistory, fetchHistory, getAvailableStock, addToCart, updateQty, clearCart, checkout, cartTotal };
 }

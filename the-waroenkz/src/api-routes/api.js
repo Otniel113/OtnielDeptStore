@@ -53,6 +53,10 @@ export const productAPI = {
 };
 
 // Checkout
-export const checkoutAPI = {
+export const transactionAPI = {
   checkout: (items) => request('POST', '/checkout', { body: { items }, auth: true }),
+  getHistory: () => request('GET', '/history', { auth: true }),
+  getReport: (start, end) => request('GET', `/report?start_date=${start}&end_date=${end}`, { auth: true }),
+  getReportToday: () => request('GET', '/report/today', { auth: true }),
 };
+

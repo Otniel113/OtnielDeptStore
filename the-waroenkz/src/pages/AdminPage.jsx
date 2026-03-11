@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { useStore } from '../Controller/StoreContext';
+import { transactionAPI } from '../api-routes/api';
 
 export default function AdminPage() {
   const {
@@ -13,7 +14,6 @@ export default function AdminPage() {
     updateCategory,
     deleteCategory,
     logout,
-    loading,
   } = useStore();
 
   const navigate = useNavigate();
@@ -25,9 +25,41 @@ export default function AdminPage() {
   const [submitting, setSubmitting] = useState(false);
   const [error, setError] = useState('');
 
+  // Report states
+  const [reportOption, setReportOption] = useState('today');
+  const [startDate, setStartDate] = useState('');
+  const [endDate, setEndDate] = useState('');
+  const [reportData, setReportData] = useState(null);
+  const [fetchingReport, setFetchingReport] = useState(false);
+
+  async function handleFetchReport(option = reportOption) {
+    setFetchingReport(true);
+      try {
+      let data = null;
+      if (option === 'today') {
+        data = await transactionAPI.getReportToday();
+      } else {
+        if (!startDate || !endDate) {
+          setFetchingReport(false);
+          return;
+        }
+        data = await transactionAPI.getReport(startDate, endDate);
+      }
+      setReportData(data);
+    } catch (err) {
+      alert(err.message || 'Failed to fetch report');
+    } finally {
+      setFetchingReport(false);
+    }
+  }
+
   function switchTab(tab) {
     setCurrentTab(tab);
+    if (tab === 'report') {
+      handleFetchReport(reportOption);
+    }
   }
+
 
   function openModal(id = null) {
     setError('');
@@ -154,6 +186,14 @@ export default function AdminPage() {
           >
             Categories
           </button>
+          <button
+            onClick={() => switchTab('report')}
+            className={`flex-1 md:w-full text-center md:text-left px-4 py-3 rounded-lg font-mono text-sm font-bold uppercase tracking-wider transition-colors hover:bg-background/50 focus:bg-background md:border-l-4 md:border-b-0 border-b-4 whitespace-nowrap ${
+              currentTab === 'report' ? 'bg-sidebar border-gold-start' : 'border-transparent'
+            }`}
+          >
+            Report
+          </button>
         </nav>
 
         <div className="p-4 border-t-2 border-border hidden md:block">
@@ -170,15 +210,91 @@ export default function AdminPage() {
       <main className="flex-1 flex flex-col bg-background min-w-0">
         <header className="h-16 border-b-2 border-border flex items-center justify-between px-4 md:px-8 bg-background shrink-0">
           <h2 className="font-serif text-xl md:text-2xl font-bold">{pageTitle}</h2>
-          <button onClick={() => openModal()} className="px-3 py-2 md:px-4 md:py-2 btn-gold rounded-md font-mono text-xs md:text-sm font-bold uppercase tracking-wide shadow-sm flex items-center gap-2">
-            <span>+ Add New</span>
-          </button>
+          {currentTab !== 'report' && (
+            <button onClick={() => openModal()} className="px-3 py-2 md:px-4 md:py-2 btn-gold rounded-md font-mono text-xs md:text-sm font-bold uppercase tracking-wide shadow-sm flex items-center gap-2">
+              <span>+ Add New</span>
+            </button>
+          )}
         </header>
 
         <div className="flex-1 overflow-auto p-4 md:p-8">
-          <div className="bg-card border-2 border-border rounded-xl shadow-card overflow-x-auto">
-            <table className="w-full text-left text-sm min-w-[600px] md:min-w-full">
-              <thead className="bg-sidebar border-b-2 border-border font-mono uppercase tracking-wider text-muted">
+          {currentTab === 'report' ? (
+            <div className="flex flex-col gap-6">
+              <div className="flex gap-4">
+                <button
+                  className={`px-4 py-2 rounded border-2 font-bold ${reportOption === 'today' ? 'bg-sidebar border-gold-start' : 'border-border bg-card'}`}
+                  onClick={() => { setReportOption('today'); handleFetchReport('today'); }}
+                >
+                  Today
+                </button>
+                <button
+                  className={`px-4 py-2 rounded border-2 font-bold ${reportOption === 'custom' ? 'bg-sidebar border-gold-start' : 'border-border bg-card'}`}
+                  onClick={() => { setReportOption('custom'); setReportData(null); }}
+                >
+                  Custom Range
+                </button>
+              </div>
+
+              {reportOption === 'custom' && (
+                <div className="flex flex-col md:flex-row gap-4 md:items-end bg-card p-4 border-2 border-border rounded-xl">
+                  <div className="flex-1 md:flex-none md:w-48">
+                    <label className="block text-sm font-bold uppercase mb-1">Start Date</label>
+                    <input type="date" value={startDate} onChange={e => setStartDate(e.target.value)} className="w-full p-2 border-2 border-border rounded bg-background" />
+                  </div>
+                  <div className="flex-1 md:flex-none md:w-48">
+                    <label className="block text-sm font-bold uppercase mb-1">End Date</label>
+                    <input type="date" value={endDate} onChange={e => setEndDate(e.target.value)} className="w-full p-2 border-2 border-border rounded bg-background" />
+                  </div>
+                  <button onClick={() => handleFetchReport('custom')} className="w-full md:w-auto px-6 py-2 btn-gold rounded font-bold shadow-sm">
+                    Fetch Report
+                  </button>
+                </div>
+              )}
+
+              {fetchingReport ? (
+                <div className="bg-card border-2 border-border rounded-xl p-8 text-center text-muted font-sans font-semibold">
+                  Loading...
+                </div>
+              ) : reportData ? (
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+                  <div className="bg-card border-2 border-border rounded-xl p-6 shadow-sm flex flex-col justify-center">
+                    <h3 className="font-mono text-sm uppercase tracking-wider text-muted mb-2">Total Revenue</h3>
+                    <span className="font-serif text-3xl font-bold text-foreground">
+                      Rp {Number(reportData.total_revenue || 0).toLocaleString()}
+                    </span>
+                  </div>
+                  <div className="bg-card border-2 border-border rounded-xl p-6 shadow-sm flex flex-col justify-center">
+                    <h3 className="font-mono text-sm uppercase tracking-wider text-muted mb-2">Total Transactions</h3>
+                    <span className="font-serif text-3xl font-bold text-foreground">
+                      {reportData.total_transaction || 0}
+                    </span>
+                  </div>
+                  <div className="bg-card border-2 border-border rounded-xl p-6 shadow-sm flex flex-col justify-center">
+                    <h3 className="font-mono text-sm uppercase tracking-wider text-muted mb-2">Most Sold Product</h3>
+                    {reportData.most_sold_product && reportData.most_sold_product.name ? (
+                      <div>
+                        <span className="font-serif text-2xl font-bold text-foreground block mb-1">
+                          {reportData.most_sold_product.name}
+                        </span>
+                        <span className="font-sans text-sm font-semibold text-muted">
+                          {reportData.most_sold_product.sold_qty} sold
+                        </span>
+                      </div>
+                    ) : (
+                      <span className="font-serif text-xl font-bold text-muted">N/A</span>
+                    )}
+                  </div>
+                </div>
+              ) : (
+                <div className="bg-card border-2 border-border rounded-xl p-8 text-center text-muted font-sans font-semibold">
+                  No reports found.
+                </div>
+              )}
+            </div>
+          ) : (
+            <div className="bg-card border-2 border-border rounded-xl shadow-card overflow-x-auto">
+              <table className="w-full text-left text-sm min-w-[600px] md:min-w-full">
+                <thead className="bg-sidebar border-b-2 border-border font-mono uppercase tracking-wider text-muted">
                 {currentTab === 'products' ? (
                   <tr>
                     <th className="px-6 py-4 font-bold">ID</th>
@@ -233,6 +349,7 @@ export default function AdminPage() {
               </tbody>
             </table>
           </div>
+          )}
         </div>
       </main>
 

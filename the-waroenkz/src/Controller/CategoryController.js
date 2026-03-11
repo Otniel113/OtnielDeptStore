@@ -8,7 +8,9 @@ export function useCategoryController() {
     try {
       const cats = await categoryAPI.getAll();
       setCategories(cats || []);
-    } catch {}
+    } catch (e) {
+      console.error(e);
+    }
   }, []);
 
   async function createCategory(data) {

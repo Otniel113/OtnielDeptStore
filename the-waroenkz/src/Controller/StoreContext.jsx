@@ -1,3 +1,4 @@
+/* eslint-disable react-refresh/only-export-components */
 import { createContext, useContext, useState, useEffect, useCallback } from 'react';
 import { useAuthController } from './AuthController';
 import { useCategoryController } from './CategoryController';
@@ -20,11 +21,12 @@ export function StoreProvider({ children }) {
         categoryDesc.fetchCategories(),
         productDesc.fetchProducts(),
       ]);
-    } catch {
-      // Ignore
+    } catch (e) {
+      console.error(e);
     } finally {
       setLoading(false);
     }
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [categoryDesc.fetchCategories, productDesc.fetchProducts]);
 
   useEffect(() => {

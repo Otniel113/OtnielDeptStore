@@ -4,11 +4,13 @@ import { productAPI } from '../api-routes/api';
 export function useProductController() {
   const [products, setProducts] = useState([]);
 
-  const fetchProducts = useCallback(async () => {
+  const fetchProducts = useCallback(async (name = '') => {
     try {
-      const prods = await productAPI.getAll();
+      const prods = await productAPI.getAll(name);
       setProducts(prods || []);
-    } catch {}
+    } catch (e) {
+      console.error(e);
+    }
   }, []);
 
   async function createProduct(data) {
