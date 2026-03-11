@@ -1,5 +1,5 @@
 export default function CategoryFilters({ categories, activeCategory, onSetCategory }) {
-  const allCategories = [{ id: 'all', label: 'All Items' }, ...categories];
+  const allCategories = [{ id: 'all', name: 'All Items' }, ...categories];
 
   return (
     <div className="px-6 py-4 overflow-x-auto whitespace-nowrap border-b border-border bg-sidebar shrink-0 no-scrollbar" role="tablist" aria-label="Product Categories">
@@ -16,7 +16,7 @@ export default function CategoryFilters({ categories, activeCategory, onSetCateg
                 : 'bg-transparent text-muted border-border hover:border-foreground hover:text-foreground'
             }`}
           >
-            {cat.label}
+            {cat.name}
           </button>
         ))}
       </div>

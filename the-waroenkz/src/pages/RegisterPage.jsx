@@ -1,21 +1,37 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
+import { useStore } from '../Controller/StoreContext';
 
 export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [confirmPassword, setConfirmPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
+  const { register } = useStore();
 
-  function handleRegister(e) {
+  async function handleRegister(e) {
     e.preventDefault();
+    setError('');
     if (password !== confirmPassword) {
-      alert('Passwords do not match');
+      setError('Passwords do not match');
       return;
     }
-    // Mock register — redirect to login
-    navigate('/login');
+    if (password.length < 6) {
+      setError('Password must be at least 6 characters');
+      return;
+    }
+    setLoading(true);
+    try {
+      await register(username, email, password);
+      navigate('/login');
+    } catch (err) {
+      setError(err.message || 'Registration failed');
+    } finally {
+      setLoading(false);
+    }
   }
 
   return (
@@ -23,12 +39,15 @@ export default function RegisterPage() {
       <div className="w-full max-w-md bg-card border-2 border-border shadow-card rounded-xl p-8">
         <div className="text-center mb-8">
           <h1 className="font-serif text-3xl font-bold tracking-tight text-foreground mb-2">
-            Serif<span className="text-gold-dark">.</span> POS
+            The Waroenkz
           </h1>
           <p className="font-mono text-sm text-muted uppercase tracking-widest">Create Account</p>
         </div>
 
         <form onSubmit={handleRegister} className="space-y-4">
+          {error && (
+            <div className="p-3 bg-danger/10 border border-danger/30 rounded-lg text-danger text-sm font-semibold">{error}</div>
+          )}
           <div>
             <label htmlFor="email" className="block text-sm font-bold font-mono uppercase tracking-wide mb-2 text-foreground">Email</label>
             <input
@@ -81,8 +100,8 @@ export default function RegisterPage() {
             />
           </div>
 
-          <button type="submit" className="w-full h-12 btn-gold rounded-lg shadow-sm font-bold text-lg tracking-wide uppercase font-mono transition-transform active:scale-[0.98]">
-            Register
+          <button type="submit" disabled={loading} className="w-full h-12 btn-gold rounded-lg shadow-sm font-bold text-lg tracking-wide uppercase font-mono transition-transform active:scale-[0.98] disabled:opacity-50">
+            {loading ? 'Creating account...' : 'Register'}
           </button>
         </form>
 

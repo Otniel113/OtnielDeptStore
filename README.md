@@ -10,11 +10,11 @@ Menggunakan Github Pages pada link: https://otnielabiezer.com/OtnielDeptStore/
 
 ## Tech Stack
 ### 1. The Waroenkz
-Frontend (Coming Soon):
+Frontend:
 1. Bahasa dan Framework: ![JavaScript](https://img.shields.io/badge/JavaScript-323330?style=for-the-badge&logo=javascript&logoColor=F7DF1E) ![React](https://img.shields.io/badge/React-20232A?style=for-the-badge&logo=react&logoColor=61DAFB)
 2. Styling: ![Tailwind CSS](https://img.shields.io/badge/Tailwind_CSS-38B2AC?style=for-the-badge&logo=tailwind-css&logoColor=white)
 3. Cloud: ![Vercel](https://img.shields.io/badge/Vercel-000000?style=for-the-badge&logo=vercel&logoColor=white)
-4. Link: COMING SOON
+4. Link: https://thewaroenkz.vercel.app/
 
 Backend:
 1. Bahasa: ![Go](https://img.shields.io/badge/Go-00ADD8?style=for-the-badge&logo=go&logoColor=white)

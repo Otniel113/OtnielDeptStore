@@ -1,4 +1,4 @@
-import { formatIDR } from '../data';
+import { formatIDR } from '../utils/currencyIDR';
 
 export default function HistoryModal({ isOpen, onClose, history }) {
   if (!isOpen) return null;
@@ -15,24 +15,31 @@ export default function HistoryModal({ isOpen, onClose, history }) {
           </button>
         </div>
         <div className="flex-1 overflow-y-auto p-6 bg-background space-y-4">
-          {history.map((t, idx) => (
-            <div key={idx} className="border-2 border-border rounded-lg p-4 bg-card shadow-sm hover:shadow-md transition-shadow">
-              <div className="flex justify-between items-start mb-2 border-b border-dashed border-border pb-2">
-                <div>
-                  <span className="font-mono font-bold text-lg text-foreground">{t.id}</span>
-                  <span className="block text-xs font-mono text-muted uppercase tracking-wide">{t.date}</span>
+          {history.length === 0 ? (
+            <p className="text-center text-muted py-8 font-sans">No transactions yet this session.</p>
+          ) : (
+            history.map((t, idx) => (
+              <div key={idx} className="border-2 border-border rounded-lg p-4 bg-card shadow-sm hover:shadow-md transition-shadow">
+                <div className="flex justify-between items-start mb-2 border-b border-dashed border-border pb-2">
+                  <div>
+                    <span className="font-mono font-bold text-lg text-foreground">#{t.id}</span>
+                    <span className="block text-xs font-mono text-muted uppercase tracking-wide">
+                      {t.created_at ? new Date(t.created_at).toLocaleDateString() : 'Today'}
+                    </span>
+                  </div>
+                  <span className="font-serif font-bold text-xl text-foreground">{formatIDR(t.total_amount)}</span>
                 </div>
-                <span className="font-serif font-bold text-xl text-foreground">{formatIDR(t.total)}</span>
+                <ul className="space-y-1">
+                  {(t.details || []).map((d, j) => (
+                    <li key={j} className="flex justify-between text-sm font-sans font-semibold text-muted">
+                      <span>{d.quantity}x {d.product_name}</span>
+                      <span>{formatIDR(d.subtotal)}</span>
+                    </li>
+                  ))}
+                </ul>
               </div>
-              <ul className="space-y-1">
-                {t.items.map((i, j) => (
-                  <li key={j} className="flex justify-between text-sm font-sans font-semibold text-muted">
-                    <span>{i.qty}x {i.name}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-          ))}
+            ))
+          )}
         </div>
       </div>
     </div>

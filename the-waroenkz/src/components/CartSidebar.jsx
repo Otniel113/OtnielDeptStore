@@ -1,6 +1,6 @@
-import { formatIDR } from '../data';
+import { formatIDR } from '../utils/currencyIDR';
 
-export default function CartSidebar({ cart, cartTotal, orderId, isCartOpen, onToggleCart, onUpdateQty, onProcessPayment, paymentState }) {
+export default function CartSidebar({ cart, cartTotal, isCartOpen, onToggleCart, onUpdateQty, onProcessPayment, paymentState }) {
   return (
     <>
       {/* Cart Sidebar */}
@@ -24,7 +24,6 @@ export default function CartSidebar({ cart, cartTotal, orderId, isCartOpen, onTo
         {/* Desktop Header */}
         <div className="hidden md:flex p-6 border-b-2 border-dashed border-border justify-between items-baseline bg-paper">
           <h2 id="cart-heading" className="font-serif text-2xl font-bold">Current Order</h2>
-          <span className="font-mono text-sm font-bold text-muted">{orderId}</span>
         </div>
 
         {/* Cart Items */}

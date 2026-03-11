@@ -1,4 +1,4 @@
-import { formatIDR } from '../data';
+import { formatIDR } from '../utils/currencyIDR';
 
 export default function ProductCard({ product, available, onClick, disabled }) {
   const isOutOfStock = available <= 0;
@@ -21,7 +21,7 @@ export default function ProductCard({ product, available, onClick, disabled }) {
       }`}
     >
       <div className="flex justify-between w-full mb-3">
-        <span className="font-mono text-xs font-bold text-muted uppercase tracking-caps bg-sidebar px-2 py-0.5 rounded">{product.category}</span>
+        <span className="font-mono text-xs font-bold text-muted uppercase tracking-caps bg-sidebar px-2 py-0.5 rounded">{product.category_name || ''}</span>
         <span className={`font-mono text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded ${
           isOutOfStock ? 'bg-danger text-white' : 'bg-gold-start text-black'
         }`}>

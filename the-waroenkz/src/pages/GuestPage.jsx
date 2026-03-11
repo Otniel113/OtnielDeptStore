@@ -1,20 +1,20 @@
 import { useState } from 'react';
 import { Link } from 'react-router-dom';
-import { useStore } from '../context/StoreContext';
+import { useStore } from '../Controller/StoreContext';
 import Header from '../components/Header';
 import CategoryFilters from '../components/CategoryFilters';
 import ProductCard from '../components/ProductCard';
 
 export default function GuestPage() {
-  const { categories, products } = useStore();
+  const { categories, products, loading } = useStore();
   const [activeCategory, setActiveCategory] = useState('all');
 
-  const allCategories = [{ id: 'all', label: 'All Items', description: 'All of our items across all of the categories' }, ...categories];
+  const allCategories = [{ id: 'all', name: 'All Items', description: 'All of our items across all of the categories' }, ...categories];
   const activeInfo = allCategories.find(c => c.id === activeCategory);
 
   const filtered = activeCategory === 'all'
     ? products
-    : products.filter(p => p.category === activeCategory);
+    : products.filter(p => p.category_id === activeCategory);
 
   return (
     <div className="antialiased font-sans text-foreground h-screen flex flex-col overflow-hidden selection:bg-gold-start/30 selection:text-black">
@@ -34,15 +34,19 @@ export default function GuestPage() {
 
           <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-background">
             <div className="mb-6">
-              <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-2">{activeInfo?.label}</h2>
+              <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-2">{activeInfo?.name}</h2>
               <p className="font-sans text-lg text-muted max-w-2xl">{activeInfo?.description}</p>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
-              {filtered.map(p => (
-                <ProductCard key={p.id} product={p} available={p.stock} />
-              ))}
-            </div>
+            {loading ? (
+              <div className="text-center py-12 text-muted font-mono">Loading...</div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+                {filtered.map(p => (
+                  <ProductCard key={p.id} product={p} available={p.stock} />
+                ))}
+              </div>
+            )}
           </div>
         </div>
       </main>

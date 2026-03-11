@@ -1,18 +1,19 @@
 import { useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useStore } from '../context/StoreContext';
+import { useNavigate } from 'react-router-dom';
+import { useStore } from '../Controller/StoreContext';
 
 export default function AdminPage() {
   const {
     categories,
     products,
-    addProduct,
+    createProduct,
     updateProduct,
     deleteProduct,
-    addCategory,
+    createCategory,
     updateCategory,
     deleteCategory,
-    setUser,
+    logout,
+    loading,
   } = useStore();
 
   const navigate = useNavigate();
@@ -21,29 +22,32 @@ export default function AdminPage() {
   const [isEditing, setIsEditing] = useState(false);
   const [editId, setEditId] = useState(null);
   const [formData, setFormData] = useState({});
+  const [submitting, setSubmitting] = useState(false);
+  const [error, setError] = useState('');
 
   function switchTab(tab) {
     setCurrentTab(tab);
   }
 
   function openModal(id = null) {
+    setError('');
     if (id !== null) {
       setIsEditing(true);
       setEditId(id);
       if (currentTab === 'products') {
         const item = products.find(p => p.id === id);
-        setFormData({ name: item.name, category: item.category, price: item.price, stock: item.stock });
+        setFormData({ name: item.name, category_id: item.category_id, price: item.price, stock: item.stock });
       } else {
         const item = categories.find(c => c.id === id);
-        setFormData({ id: item.id, label: item.label, description: item.description });
+        setFormData({ name: item.name, description: item.description });
       }
     } else {
       setIsEditing(false);
       setEditId(null);
       if (currentTab === 'products') {
-        setFormData({ name: '', category: categories[0]?.id || '', price: '', stock: '' });
+        setFormData({ name: '', category_id: categories[0]?.id || '', price: '', stock: '' });
       } else {
-        setFormData({ id: '', label: '', description: '' });
+        setFormData({ name: '', description: '' });
       }
     }
     setModalOpen(true);
@@ -54,54 +58,61 @@ export default function AdminPage() {
     setFormData({});
     setEditId(null);
     setIsEditing(false);
+    setError('');
   }
 
-  function handleFormSubmit(e) {
+  async function handleFormSubmit(e) {
     e.preventDefault();
+    setSubmitting(true);
+    setError('');
 
-    if (currentTab === 'products') {
-      const data = {
-        name: formData.name,
-        category: formData.category,
-        price: Number(formData.price),
-        stock: Number(formData.stock),
-      };
-      if (isEditing) {
-        updateProduct(editId, data);
+    try {
+      if (currentTab === 'products') {
+        const data = {
+          name: formData.name,
+          category_id: Number(formData.category_id),
+          price: Number(formData.price),
+          stock: Number(formData.stock),
+        };
+        if (isEditing) {
+          await updateProduct(editId, data);
+        } else {
+          await createProduct(data);
+        }
       } else {
-        addProduct(data);
-      }
-    } else {
-      const data = {
-        id: formData.id,
-        label: formData.label,
-        description: formData.description || '',
-      };
-      if (isEditing) {
-        updateCategory(editId, data);
-      } else {
-        const success = addCategory(data);
-        if (!success) {
-          alert('ID already exists');
-          return;
+        const data = {
+          name: formData.name,
+          description: formData.description || '',
+        };
+        if (isEditing) {
+          await updateCategory(editId, data);
+        } else {
+          await createCategory(data);
         }
       }
+      closeModal();
+    } catch (err) {
+      setError(err.message || 'Operation failed');
+    } finally {
+      setSubmitting(false);
     }
-
-    closeModal();
   }
 
-  function handleDelete(id) {
+  async function handleDelete(id) {
     if (!confirm('Are you sure you want to delete this item?')) return;
-    if (currentTab === 'products') {
-      deleteProduct(id);
-    } else {
-      deleteCategory(id);
+    try {
+      if (currentTab === 'products') {
+        await deleteProduct(id);
+      } else {
+        await deleteCategory(id);
+      }
+    } catch (err) {
+      alert(err.message || 'Delete failed');
     }
   }
 
   function handleLogout() {
-    setUser(null);
+    logout();
     navigate('/login');
   }
 
@@ -117,7 +128,7 @@ export default function AdminPage() {
       <aside className="w-full md:w-64 bg-sidebar border-b-2 md:border-b-0 md:border-r-2 border-border flex flex-col shrink-0">
         <div className="h-16 flex items-center justify-between px-6 border-b-2 border-border">
           <h1 className="font-serif text-xl font-bold tracking-tight text-foreground">
-            Serif<span className="text-gold-dark">.</span> Admin
+            The Waroenkz Admin
           </h1>
           <button onClick={handleLogout} className="md:hidden text-muted hover:text-danger hover:font-bold transition-all" aria-label="Logout">
             <svg xmlns="http://www.w3.org/2000/svg" className="h-6 w-6" fill="none" viewBox="0 0 24 24" stroke="currentColor">
@@ -180,7 +191,7 @@ export default function AdminPage() {
                 ) : (
                   <tr>
                     <th className="px-6 py-4 font-bold">ID</th>
-                    <th className="px-6 py-4 font-bold w-1/4">Label</th>
+                    <th className="px-6 py-4 font-bold w-1/4">Name</th>
                     <th className="px-6 py-4 font-bold">Description</th>
                     <th className="px-6 py-4 font-bold text-center">Actions</th>
                   </tr>
@@ -193,7 +204,7 @@ export default function AdminPage() {
                         <td className="px-6 py-4 font-mono text-muted">#{item.id}</td>
                         <td className="px-6 py-4 font-serif text-lg text-foreground">{item.name}</td>
                         <td className="px-6 py-4">
-                          <span className="bg-sidebar px-2 py-1 rounded font-mono text-xs font-bold uppercase tracking-wide">{item.category}</span>
+                          <span className="bg-sidebar px-2 py-1 rounded font-mono text-xs font-bold uppercase tracking-wide">{item.category_name}</span>
                         </td>
                         <td className="px-6 py-4 text-right font-mono">{item.price.toLocaleString()}</td>
                         <td className="px-6 py-4 text-right font-mono">{item.stock}</td>
@@ -207,8 +218,8 @@ export default function AdminPage() {
                     ))
                   : categories.map(item => (
                       <tr key={item.id} className="hover:bg-sidebar/50 transition-colors">
-                        <td className="px-6 py-4 font-mono text-muted">{item.id}</td>
-                        <td className="px-6 py-4 font-serif text-lg text-foreground">{item.label}</td>
+                        <td className="px-6 py-4 font-mono text-muted">#{item.id}</td>
+                        <td className="px-6 py-4 font-serif text-lg text-foreground">{item.name}</td>
                         <td className="px-6 py-4 text-muted">{item.description}</td>
                         <td className="px-6 py-4 text-center">
                           <div className="flex items-center justify-center gap-2">
@@ -239,6 +250,9 @@ export default function AdminPage() {
             </div>
 
             <form onSubmit={handleFormSubmit} className="space-y-4">
+              {error && (
+                <div className="p-3 bg-danger/10 border border-danger/30 rounded-lg text-danger text-sm font-semibold">{error}</div>
+              )}
               {currentTab === 'products' ? (
                 <>
                   <div>
@@ -248,9 +262,9 @@ export default function AdminPage() {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <label className="block text-sm font-bold uppercase mb-1">Category</label>
-                      <select value={formData.category || ''} onChange={e => handleChange('category', e.target.value)} className="w-full p-3 border-2 border-border rounded bg-background" required>
+                      <select value={formData.category_id || ''} onChange={e => handleChange('category_id', e.target.value)} className="w-full p-3 border-2 border-border rounded bg-background" required>
                         {categories.map(c => (
-                          <option key={c.id} value={c.id}>{c.label}</option>
+                          <option key={c.id} value={c.id}>{c.name}</option>
                         ))}
                       </select>
                     </div>
@@ -267,12 +281,8 @@ export default function AdminPage() {
               ) : (
                 <>
                   <div>
-                    <label className="block text-sm font-bold uppercase mb-1">ID (Slug)</label>
-                    <input type="text" value={formData.id || ''} onChange={e => handleChange('id', e.target.value)} className="w-full p-3 border-2 border-border rounded bg-background" readOnly={isEditing} required />
-                  </div>
-                  <div>
-                    <label className="block text-sm font-bold uppercase mb-1">Label</label>
-                    <input type="text" value={formData.label || ''} onChange={e => handleChange('label', e.target.value)} className="w-full p-3 border-2 border-border rounded bg-background" required />
+                    <label className="block text-sm font-bold uppercase mb-1">Name</label>
+                    <input type="text" value={formData.name || ''} onChange={e => handleChange('name', e.target.value)} className="w-full p-3 border-2 border-border rounded bg-background" required />
                   </div>
                   <div>
                     <label className="block text-sm font-bold uppercase mb-1">Description</label>
@@ -283,7 +293,9 @@ export default function AdminPage() {
 
               <div className="flex gap-4 mt-8 pt-4 border-t border-dashed border-border">
                 <button type="button" onClick={closeModal} className="flex-1 py-3 border-2 border-border rounded-lg font-bold hover:bg-sidebar transition-colors">Cancel</button>
-                <button type="submit" className="flex-1 py-3 btn-gold rounded-lg font-bold shadow-sm transition-transform active:scale-[0.98]">Save</button>
+                <button type="submit" disabled={submitting} className="flex-1 py-3 btn-gold rounded-lg font-bold shadow-sm transition-transform active:scale-[0.98] disabled:opacity-50">
+                  {submitting ? 'Saving...' : 'Save'}
+                </button>
               </div>
             </form>
           </div>

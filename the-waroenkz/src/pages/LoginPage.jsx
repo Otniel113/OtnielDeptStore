@@ -1,22 +1,26 @@
 import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useStore } from '../context/StoreContext';
+import { useStore } from '../Controller/StoreContext';
 
 export default function LoginPage() {
-  const [username, setUsername] = useState('');
+  const [identity, setIdentity] = useState('');
   const [password, setPassword] = useState('');
+  const [error, setError] = useState('');
+  const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
-  const { setUser } = useStore();
+  const { login } = useStore();
 
-  function handleLogin(e) {
+  async function handleLogin(e) {
     e.preventDefault();
-    // Mock login — accept any credentials. Check for "admin" to route to admin.
-    if (username.toLowerCase() === 'admin') {
-      setUser({ username, role: 'admin' });
-      navigate('/admin');
-    } else {
-      setUser({ username, role: 'member' });
-      navigate('/member');
+    setError('');
+    setLoading(true);
+    try {
+      const role = await login(identity, password);
+      navigate(role === 'admin' ? '/admin' : '/member');
+    } catch (err) {
+      setError(err.message || 'Login failed');
+    } finally {
+      setLoading(false);
     }
   }
 
@@ -25,20 +29,23 @@ export default function LoginPage() {
       <div className="w-full max-w-md bg-card border-2 border-border shadow-card rounded-xl p-8">
         <div className="text-center mb-8">
           <h1 className="font-serif text-3xl font-bold tracking-tight text-foreground mb-2">
-            Serif<span className="text-gold-dark">.</span> POS
+            The Waroenkz
           </h1>
           <p className="font-mono text-sm text-muted uppercase tracking-widest">Sign In to Continue</p>
         </div>
 
         <form onSubmit={handleLogin} className="space-y-6">
+          {error && (
+            <div className="p-3 bg-danger/10 border border-danger/30 rounded-lg text-danger text-sm font-semibold">{error}</div>
+          )}
           <div>
-            <label htmlFor="username" className="block text-sm font-bold font-mono uppercase tracking-wide mb-2 text-foreground">Username or Email</label>
+            <label htmlFor="identity" className="block text-sm font-bold font-mono uppercase tracking-wide mb-2 text-foreground">Username or Email</label>
             <input
               type="text"
-              id="username"
+              id="identity"
               required
-              value={username}
-              onChange={e => setUsername(e.target.value)}
+              value={identity}
+              onChange={e => setIdentity(e.target.value)}
               className="w-full px-4 py-3 bg-background border-2 border-border rounded-lg focus:outline-none focus:border-foreground focus:ring-1 focus:ring-foreground transition-colors font-sans"
               placeholder="Enter your credential"
             />
@@ -57,8 +64,8 @@ export default function LoginPage() {
             />
           </div>
 
-          <button type="submit" className="w-full h-12 btn-gold rounded-lg shadow-sm font-bold text-lg tracking-wide uppercase font-mono transition-transform active:scale-[0.98]">
-            Login
+          <button type="submit" disabled={loading} className="w-full h-12 btn-gold rounded-lg shadow-sm font-bold text-lg tracking-wide uppercase font-mono transition-transform active:scale-[0.98] disabled:opacity-50">
+            {loading ? 'Signing in...' : 'Login'}
           </button>
         </form>
 

@@ -1,6 +1,6 @@
 import { useState, useCallback } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { useStore } from '../context/StoreContext';
+import { useNavigate } from 'react-router-dom';
+import { useStore } from '../Controller/StoreContext';
 import Header from '../components/Header';
 import CategoryFilters from '../components/CategoryFilters';
 import ProductCard from '../components/ProductCard';
@@ -15,26 +15,26 @@ export default function MemberHomePage() {
     cartTotal,
     transactionHistory,
     user,
-    setUser,
+    loading,
     getAvailableStock,
     addToCart,
     updateQty,
-    processPayment,
+    checkout,
+    logout,
   } = useStore();
 
   const navigate = useNavigate();
   const [activeCategory, setActiveCategory] = useState('all');
   const [isCartOpen, setIsCartOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
-  const [orderId, setOrderId] = useState('#001');
   const [paymentState, setPaymentState] = useState('idle'); // idle | processing | approved
 
-  const allCategories = [{ id: 'all', label: 'All Items', description: 'All of our items across all of the categories' }, ...categories];
+  const allCategories = [{ id: 'all', name: 'All Items', description: 'All of our items across all of the categories' }, ...categories];
   const activeInfo = allCategories.find(c => c.id === activeCategory);
 
   const filtered = activeCategory === 'all'
     ? products
-    : products.filter(p => p.category === activeCategory);
+    : products.filter(p => p.category_id === activeCategory);
 
   const toggleCart = useCallback(() => setIsCartOpen(prev => !prev), []);
 
@@ -43,22 +43,23 @@ export default function MemberHomePage() {
 
     setPaymentState('processing');
 
-    setTimeout(() => {
-      setPaymentState('approved');
-
-      setTimeout(() => {
-        processPayment(orderId);
+    checkout()
+      .then(() => {
+        setPaymentState('approved');
+        setTimeout(() => {
+          setPaymentState('idle');
+          if (window.innerWidth < 768 && isCartOpen) {
+            setIsCartOpen(false);
+          }
+        }, 1000);
+      })
+      .catch(() => {
         setPaymentState('idle');
-        setOrderId('#' + Math.floor(Math.random() * 900 + 100));
-        if (window.innerWidth < 768 && isCartOpen) {
-          setIsCartOpen(false);
-        }
-      }, 1000);
-    }, 1000);
+      });
   }
 
   function handleLogout() {
-    setUser(null);
+    logout();
     navigate('/');
   }
 
@@ -68,7 +69,7 @@ export default function MemberHomePage() {
   return (
     <div className="antialiased font-sans text-foreground h-screen flex flex-col overflow-hidden selection:bg-gold-start/30 selection:text-black">
       <Header
-        subtitle="Jakarta Station"
+        subtitle="Member Home"
         rightContent={
           <>
             <button onClick={() => setIsHistoryOpen(true)} className="flex items-center gap-2 font-mono text-xs font-bold uppercase tracking-caps text-muted hover:text-foreground transition-colors mr-2">
@@ -101,27 +102,30 @@ export default function MemberHomePage() {
 
           <div className="flex-1 overflow-y-auto p-4 md:p-6 bg-background">
             <div className="mb-6">
-              <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-2">{activeInfo?.label}</h2>
+              <h2 className="font-serif text-3xl md:text-4xl font-bold text-foreground mb-2">{activeInfo?.name}</h2>
               <p className="font-sans text-lg text-muted max-w-2xl">{activeInfo?.description}</p>
             </div>
 
-            <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
-              {filtered.map(p => (
-                <ProductCard
-                  key={p.id}
-                  product={p}
-                  available={getAvailableStock(p.id)}
-                  onClick={addToCart}
-                />
-              ))}
-            </div>
+            {loading ? (
+              <div className="text-center py-12 text-muted font-mono">Loading...</div>
+            ) : (
+              <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6">
+                {filtered.map(p => (
+                  <ProductCard
+                    key={p.id}
+                    product={p}
+                    available={getAvailableStock(p.id)}
+                    onClick={addToCart}
+                  />
+                ))}
+              </div>
+            )}
           </div>
         </div>
 
         <CartSidebar
           cart={cart}
           cartTotal={cartTotal}
-          orderId={orderId}
           isCartOpen={isCartOpen}
           onToggleCart={toggleCart}
           onUpdateQty={updateQty}
