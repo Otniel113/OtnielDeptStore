@@ -1,0 +1,127 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Register - Serif POS</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        background: '#FBF3D1',   // Cream
+                        sidebar: '#EBE5D5',      // Slightly darker cream for contrast
+                        foreground: '#0F0F0F',   // Near Black (High Contrast)
+                        muted: '#525252',        // Dark Gray (High Contrast Secondary)
+                        border: '#8C8C8C',       // Mid-Gray (Visible Borders)
+                        card: '#FFFFFF',         // White
+                        // Gold Palette
+                        gold: {
+                            start: '#D4AF37',    // Metallic Gold
+                            end: '#F3E5AB',      // Creamy Gold
+                            dark: '#B4941F',     // Hover state
+                        },
+                    },
+                    fontFamily: {
+                        serif: ['"Playfair Display"', 'serif'],
+                        sans: ['"Source Sans 3"', 'sans-serif'],
+                        mono: ['"IBM Plex Mono"', 'monospace'],
+                    },
+                    boxShadow: {
+                        'card': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #FBF3D1; color: #0F0F0F; }
+        .btn-gold {
+            background-color: #D4AF37;
+            color: #0F0F0F;
+            border: 1px solid #B4941F;
+        }
+        .btn-gold:hover {
+            background-color: #B4941F;
+        }
+    </style>
+</head>
+<body class="flex items-center justify-center min-h-screen p-4">
+
+    <div class="w-full max-w-md bg-card border-2 border-border shadow-card rounded-xl p-8">
+        <div class="text-center mb-8">
+            <h1 class="font-serif text-3xl font-bold tracking-tight text-foreground mb-2">
+                Serif<span class="text-gold-dark">.</span> POS
+            </h1>
+            <p class="font-mono text-sm text-muted uppercase tracking-widest">Create Account</p>
+        </div>
+
+        <form onsubmit="handleRegister(event)" class="space-y-4">
+            <div>
+                <label for="email" class="block text-sm font-bold font-mono uppercase tracking-wide mb-2 text-foreground">Email</label>
+                <input type="email" id="email" name="email" required 
+                    class="w-full px-4 py-3 bg-background border-2 border-border rounded-lg focus:outline-none focus:border-foreground focus:ring-1 focus:ring-foreground transition-colors font-sans"
+                    placeholder="Enter your email">
+            </div>
+
+            <div>
+                <label for="username" class="block text-sm font-bold font-mono uppercase tracking-wide mb-2 text-foreground">Username</label>
+                <input type="text" id="username" name="username" required 
+                    class="w-full px-4 py-3 bg-background border-2 border-border rounded-lg focus:outline-none focus:border-foreground focus:ring-1 focus:ring-foreground transition-colors font-sans"
+                    placeholder="Choose a username">
+            </div>
+
+            <div>
+                <label for="password" class="block text-sm font-bold font-mono uppercase tracking-wide mb-2 text-foreground">Password</label>
+                <input type="password" id="password" name="password" required 
+                    class="w-full px-4 py-3 bg-background border-2 border-border rounded-lg focus:outline-none focus:border-foreground focus:ring-1 focus:ring-foreground transition-colors font-sans"
+                    placeholder="Set a password">
+            </div>
+
+            <div>
+                <label for="confirmParams" class="block text-sm font-bold font-mono uppercase tracking-wide mb-2 text-foreground">Confirm Password</label>
+                <input type="password" id="confirmParams" name="confirmParams" required 
+                    class="w-full px-4 py-3 bg-background border-2 border-border rounded-lg focus:outline-none focus:border-foreground focus:ring-1 focus:ring-foreground transition-colors font-sans"
+                    placeholder="Confirm your password">
+            </div>
+
+            <button type="submit" class="w-full h-12 btn-gold rounded-lg shadow-sm font-bold text-lg tracking-wide uppercase font-mono transition-transform active:scale-[0.98]">
+                Register
+            </button>
+        </form>
+
+        <div class="mt-6 text-center">
+            <p class="text-muted font-sans text-sm">
+                Already have an account? 
+                <a href="login.html" class="font-bold text-foreground hover:text-gold-dark underline decoration-2 underline-offset-2">Login</a>
+            </p>
+        </div>
+    </div>
+
+    <script>
+        function handleRegister(e) {
+            e.preventDefault();
+            const password = document.getElementById('password').value;
+            const confirm = document.getElementById('confirmParams').value;
+
+            if (password !== confirm) {
+                alert("Passwords do not match");
+                return;
+            }
+
+            // In a real app, API call would go here.
+            
+            // Redirect to login or home
+            window.location.href = 'login.html';
+        }
+    </script>
+</body>
+</html>

@@ -1,0 +1,244 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+    <title>Serif POS - Guest View</title>
+    
+    <!-- Google Fonts -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@500;600&family=Playfair+Display:ital,wght@0,600;0,700;1,600&family=Source+Sans+3:wght@400;600;700&display=swap" rel="stylesheet">
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script>
+        tailwind.config = {
+            theme: {
+                extend: {
+                    colors: {
+                        background: '#FBF3D1',   // Cream
+                        sidebar: '#EBE5D5',      // Slightly darker cream for contrast
+                        foreground: '#0F0F0F',   // Near Black (High Contrast)
+                        muted: '#525252',        // Dark Gray (High Contrast Secondary)
+                        border: '#8C8C8C',       // Mid-Gray (Visible Borders)
+                        card: '#FFFFFF',         // White
+                        paper: '#FFFFFF',        
+                        // New Accessible Gold Palette
+                        gold: {
+                            start: '#D4AF37',    // Metallic Gold
+                            end: '#F3E5AB',      // Creamy Gold
+                            dark: '#B4941F',     // Hover state
+                        },
+                        danger: '#991B1B',       // High contrast red
+                    },
+                    fontFamily: {
+                        serif: ['"Playfair Display"', 'serif'],
+                        sans: ['"Source Sans 3"', 'sans-serif'],
+                        mono: ['"IBM Plex Mono"', 'monospace'],
+                    },
+                    letterSpacing: {
+                        'editorial': '0.01em',
+                        'caps': '0.15em',
+                    },
+                    boxShadow: {
+                        'card': '0 4px 6px -1px rgba(0, 0, 0, 0.1), 0 2px 4px -1px rgba(0, 0, 0, 0.06)',
+                        'elevated': '0 20px 25px -5px rgba(0, 0, 0, 0.1), 0 10px 10px -5px rgba(0, 0, 0, 0.04)',
+                    }
+                }
+            }
+        }
+    </script>
+    <style>
+        body { background-color: #FBF3D1; color: #0F0F0F; }
+        .no-scrollbar::-webkit-scrollbar { display: none; }
+        .no-scrollbar { -ms-overflow-style: none; scrollbar-width: none; }
+        
+        /* Flat Gold Colors (no gradient) */
+        :root {
+            --gold: #D4AF37; /* Metallic Gold */
+            --gold-cream: #F3E5AB; /* Light gold/cream */
+            --gold-dark: #B4941F; /* Darker gold for hover */
+        }
+        .btn-gold {
+            background-color: var(--gold);
+            color: #0F0F0F;
+            border: 1px solid var(--gold-dark);
+        }
+        .btn-gold:hover {
+            background-color: var(--gold-dark);
+        }
+        .btn-gold:focus-visible {
+            outline: 3px solid #000000;
+            outline-offset: 2px;
+        }
+        /* Utility fallbacks for classes referenced in markup */
+        .bg-gold-start { background-color: var(--gold) !important; }
+        .bg-gold-cream { background-color: var(--gold-cream) !important; }
+        .bg-gold-dark { background-color: var(--gold-dark) !important; }
+        .text-gold-dark { color: var(--gold-dark) !important; }
+
+        /* Selection highlight using flat gold */
+        ::selection { background: rgba(212,175,55,0.18); color: #000000; }
+
+        /* Sold Out Texture */
+        .sold-out-pattern {
+            background-image: repeating-linear-gradient(45deg, transparent, transparent 10px, #f3f4f6 10px, #f3f4f6 20px);
+        }
+    </style>
+</head>
+<body class="antialiased font-sans text-foreground h-screen flex flex-col overflow-hidden selection:bg-gold-start/30 selection:text-black">
+
+    <!-- Top Bar -->
+    <header class="h-16 border-b-2 border-border bg-sidebar flex items-center justify-between px-6 shrink-0 z-20">
+        <div class="flex items-center gap-4">
+            <h1 class="font-serif text-xl md:text-2xl font-bold tracking-tight text-foreground" aria-label="Serif POS System">
+                Serif<span class="text-gold-dark">.</span> POS
+            </h1>
+            <span class="h-6 w-0.5 bg-muted hidden md:block" aria-hidden="true"></span>
+            <span class="font-mono text-sm font-semibold uppercase tracking-caps text-muted hidden md:block">Guest View</span>
+        </div>
+        <div class="flex items-center gap-4">
+             <a href="login.html" class="font-mono text-sm font-bold uppercase tracking-caps text-foreground hover:text-gold-dark transition-colors">Login</a>
+             <a href="register.html" class="px-4 py-2 btn-gold rounded-md font-mono text-sm font-bold uppercase tracking-caps shadow-sm">Register</a>
+        </div>
+    </header>
+
+    <!-- Main Layout -->
+    <main class="flex-1 flex overflow-hidden relative">
+        
+        <!-- Left Column: Menu -->
+        <div class="flex-1 flex flex-col min-w-0 bg-background pb-0">
+            <!-- Category Filter -->
+            <div class="px-6 py-4 overflow-x-auto whitespace-nowrap border-b border-border bg-sidebar shrink-0 no-scrollbar" role="tablist" aria-label="Product Categories">
+                <div class="flex gap-3" id="category-filters">
+                    <!-- Injected via JS -->
+                </div>
+            </div>
+
+            <!-- Product Grid -->
+            <div class="flex-1 overflow-y-auto p-4 md:p-6 bg-background">
+                <!-- Category Description -->
+                <div class="mb-6">
+                    <h2 id="category-title" class="font-serif text-3xl md:text-4xl font-bold text-foreground mb-2"></h2>
+                    <p id="category-desc" class="font-sans text-lg text-muted max-w-2xl"></p>
+                </div>
+
+                <div class="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 xl:grid-cols-5 gap-4 md:gap-6" id="product-grid">
+                    <!-- Products injected via JS -->
+                </div>
+            </div>
+        </div>
+
+    </main>
+
+    <script>
+        // Data with Inventory
+        const categories = [
+            { id: 'all', label: 'All Items', description: "All of our items across all of the categories" },
+            { id: 'coffee', label: 'Coffee', description: "Our premium coffee selection" },
+            { id: 'bakery', label: 'Bakery', description: "Freshly baked goods" },
+            { id: 'tea', label: 'Tea', description: "A variety of teas" }
+        ];
+
+        const products = [
+            { id: 1, name: "Espresso", category: "coffee", price: 25000, stock: 15 },
+            { id: 2, name: "Cappuccino", category: "coffee", price: 35000, stock: 8 },
+            { id: 3, name: "Pour Over", category: "coffee", price: 38000, stock: 5 },
+            { id: 4, name: "Cold Brew", category: "coffee", price: 35000, stock: 12 },
+            { id: 5, name: "Croissant", category: "bakery", price: 28000, stock: 0 }, 
+            { id: 6, name: "Pain au Choc", category: "bakery", price: 32000, stock: 6 },
+            { id: 7, name: "Almond Tart", category: "bakery", price: 40000, stock: 3 },
+            { id: 8, name: "Earl Grey", category: "tea", price: 25000, stock: 20 },
+            { id: 9, name: "Matcha Latte", category: "tea", price: 40000, stock: 4 },
+            { id: 10, name: "Sourdough", category: "bakery", price: 45000, stock: 2 },
+            { id: 11, name: "Cinnamon Roll", category: "bakery", price: 30000, stock: 8 },
+            { id: 12, name: "Long Black", category: "coffee", price: 30000, stock: 15 }
+        ];
+
+        let activeCategory = 'all';
+
+        const formatIDR = (price) => {
+            return new Intl.NumberFormat('id-ID', { 
+                style: 'currency', 
+                currency: 'IDR',
+                minimumFractionDigits: 0,
+                maximumFractionDigits: 0
+            }).format(price);
+        };
+
+        const gridEl = document.getElementById('product-grid');
+        const filtersEl = document.getElementById('category-filters');
+
+        function renderFilters() {
+            filtersEl.innerHTML = categories.map(cat => `
+                <button 
+                    role="tab"
+                    aria-selected="${activeCategory === cat.id}"
+                    onclick="setCategory('${cat.id}')"
+                    class="px-6 py-3 rounded-full text-sm font-bold font-mono uppercase tracking-caps transition-all border-2 focus:outline-none focus:ring-4 focus:ring-black ${
+                        activeCategory === cat.id 
+                        ? 'bg-foreground text-background border-foreground shadow-md' 
+                        : 'bg-transparent text-muted border-border hover:border-foreground hover:text-foreground'
+                    }"
+                >
+                    ${cat.label}
+                </button>
+            `).join('');
+        }
+
+        function renderProducts() {
+            const filtered = activeCategory === 'all' 
+                ? products 
+                : products.filter(p => p.category === activeCategory);
+
+            gridEl.innerHTML = filtered.map(p => {
+                const available = p.stock;
+                const isOutOfStock = available <= 0;
+                
+                return `
+                <div 
+                    class="group relative flex flex-col text-left h-full rounded-xl border-2 p-5 shadow-card transition-all duration-200 
+                    ${isOutOfStock 
+                        ? 'border-border bg-gray-100 opacity-80 sold-out-pattern' 
+                        : 'bg-card border-border'}"
+                >
+                    <div class="flex justify-between w-full mb-3">
+                        <span class="font-mono text-xs font-bold text-muted uppercase tracking-caps bg-sidebar px-2 py-0.5 rounded">${p.category}</span>
+                        
+                        <span class="font-mono text-xs font-bold uppercase tracking-wide px-2 py-0.5 rounded
+                            ${isOutOfStock ? 'bg-danger text-white' : 'bg-gold-start text-black'}">
+                            ${isOutOfStock ? 'SOLD OUT' : `Left: ${available}`}
+                        </span>
+                    </div>
+                    
+                    <h3 class="font-serif text-xl md:text-2xl font-bold text-foreground mb-3 leading-tight
+                        ${isOutOfStock ? 'line-through decoration-2 decoration-danger' : ''}">${p.name}</h3>
+                    
+                    <span class="font-sans font-bold text-lg text-foreground mt-auto">${formatIDR(p.price)}</span>
+                </div>
+            `}).join('');
+        }
+
+        function setCategory(id) {
+            activeCategory = id;
+            renderFilters();
+            renderProducts();
+            renderDescription();
+        }
+
+        function renderDescription() {
+            const category = categories.find(c => c.id === activeCategory);
+            if(category) {
+                document.getElementById('category-title').innerText = category.label;
+                document.getElementById('category-desc').innerText = category.description;
+            }
+        }
+
+        renderFilters();
+        renderProducts();
+        renderDescription();
+
+    </script>
+</body>
+</html>
