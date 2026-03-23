@@ -207,7 +207,7 @@ export default function AdminPage() {
       </aside>
 
       {/* Main Content */}
-      <main className="flex-1 flex flex-col bg-background min-w-0">
+      <main className="flex-1 flex flex-col bg-background min-w-0 overflow-hidden">
         <header className="h-16 border-b-2 border-border flex items-center justify-between px-4 md:px-8 bg-background shrink-0">
           <h2 className="font-serif text-xl md:text-2xl font-bold">{pageTitle}</h2>
           {currentTab !== 'report' && (
